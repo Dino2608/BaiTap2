@@ -11,9 +11,13 @@ include file="/common/taglib.jsp"%>
 <body>
 	<form action="<c:url value='/admin/video/insert'></c:url>"
 		method="post" enctype="multipart/form-data">
-		<label for="fname">Link:</label>
+		<label class="form-label"for="lname">Link Video:</label>
 		<br> 
-		<input type="text"id="videoid" name="videoid">
+		<input class="form-input" type="text" id="lname" name="videoid">
+		<br>
+		<label class="form-label" for="lname">Upload Video:</label>
+		<br>
+		<input class="form-input" type="file" id="lname1" name="videoid1">
 		<br>
 		<label for="fname">Title:</label>
 		<br> 

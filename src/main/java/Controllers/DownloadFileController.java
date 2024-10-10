@@ -16,7 +16,7 @@ import utils.Constant;
 /**
  * Servlet implementation class DownloadFileController
  */
-@WebServlet(urlPatterns = "/image")
+@WebServlet(urlPatterns = {"/image", "/video"})
 public class DownloadFileController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -36,10 +36,19 @@ public class DownloadFileController extends HttpServlet {
 			throws ServletException, IOException {
 		String fileName = request.getParameter("fname");
 		File file = new File(Constant.UPLOAD_DIRECTORY + "/" + fileName);
-		response.setContentType("image/jpeg");
-		if (file.exists()) {
-			IOUtils.copy(new FileInputStream(file), response.getOutputStream());
+		String urlString = request.getRequestURI();
+		if (urlString.contains("/image")) {
+			response.setContentType("image/jpeg");
+			if (file.exists()) {
+				IOUtils.copy(new FileInputStream(file), response.getOutputStream());
+			}
+		} else if (urlString.contains("/video")) {
+			response.setContentType("video/mp4");
+			if (file.exists()) {
+				IOUtils.copy(new FileInputStream(file), response.getOutputStream());
+			}
 		}
+
 	}
 
 	/**

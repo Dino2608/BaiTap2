@@ -22,13 +22,9 @@ import utils.Constant;
 
 @MultipartConfig
 @WebServlet(urlPatterns = { "/admin/videos", "/admin/video/edit", "/admin/video/update",
-
 		"/admin/video/insert", "/admin/video/add", "/admin/video/delete" })
 public class VideoController extends HttpServlet {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	IVideoService videoService = new VideoService();
@@ -37,55 +33,30 @@ public class VideoController extends HttpServlet {
 	@Override
 
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
 		req.setCharacterEncoding("UTF-8");
-
 		resp.setCharacterEncoding("UTF-8");
-
 		String url = req.getRequestURI();
-
 		if (url.contains("videos")) {
-
 			List<Video> list = videoService.findAll();
-
 			req.setAttribute("listvideo", list);
-
 			req.getRequestDispatcher("/views/admin/video-list.jsp").forward(req, resp);
-
 		} else if (url.contains("/admin/video/edit")) {
-
 			String videoid = req.getParameter("videoid");
-
 			Video video = videoService.findById(videoid);
-
 			req.setAttribute("video", video);
-
 			req.getRequestDispatcher("/views/admin/video-edit.jsp").forward(req, resp);
-
 		}
-
 		else if (url.contains("/admin/video/add")) {
-
 			req.getRequestDispatcher("/views/admin/video-add.jsp").forward(req, resp);
-
 		} else if (url.contains("/admin/video/delete")) {
-
 			String id = req.getParameter("videoid");
-
 			try {
-
 				videoService.delete(id);
-
 			} catch (Exception e) {
-
 				e.printStackTrace();
-
 			}
-
 			resp.sendRedirect(req.getContextPath() + "/admin/videos");
-
 		}
-
 	}
 
 	@Override
@@ -99,82 +70,67 @@ public class VideoController extends HttpServlet {
 		String url = req.getRequestURI();
 
 		if (url.contains("/admin/video/update")) {
-
 			String videoid = req.getParameter("videoid");
-			
 			int active = Integer.parseInt(req.getParameter("actives"));
-
 			String title = req.getParameter("title");
-			
 			String description = req.getParameter("description");
-
 			int views = Integer.parseInt(req.getParameter("views"));
-			
 			int categoryid = Integer.parseInt(req.getParameter("categoryid"));
-			
+
 			Video video = new Video();
-			
+
 			video.setVideoId(videoid);
 			video.setActive(active);
 			video.setTitle(title);
 			video.setDescription(description);
 			video.setViews(views);
 			video.setCategory(categoryService.findById(categoryid));
-			
 			// lưu hình cũ
-
 			Video vidold = videoService.findById(videoid);
-
 			String fileold = vidold.getPoster();
-
 			// xử lý images
-
 			String fname = "";
-
+			String fname2 = "";
 			String uploadPath = Constant.UPLOAD_DIRECTORY;
-
 			File uploadDir = new File(uploadPath);
-
 			if (!uploadDir.exists()) {
-
 				uploadDir.mkdir();
-
+			}
+			try {
+				Part part = req.getPart("poster");
+				if (part.getSize() > 0) {
+					String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+					// đổi tên file
+					int index = filename.lastIndexOf(".");
+					String ext = filename.substring(index + 1);
+					fname = System.currentTimeMillis() + "." + ext;
+					// up load file
+					part.write(uploadPath + "/" + fname);
+					// ghi tên file vào data
+					video.setPoster(fname);
+				} else {
+					video.setPoster(fileold);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 
 			try {
-
-				Part part = req.getPart("poster");
-
+				Part part = req.getPart("videoid1");
 				if (part.getSize() > 0) {
-
-					String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString();
-
-					// đổi tên file
-
-					int index = filename.lastIndexOf(".");
-
-					String ext = filename.substring(index + 1);
-
-					fname = System.currentTimeMillis() + "." + ext;
-
-					// up load file
-
-					part.write(uploadPath + "/" + fname);
-
-					// ghi tên file vào data
-
-					video.setPoster(fname);
-
+					String fileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+					int index = fileName.lastIndexOf(".");
+					String ext = fileName.substring(index + 1);
+					fname2 = System.currentTimeMillis() + "." + ext;
+					part.write(uploadPath + "/" + fname2);
+					video.setVideoId(fname2);
+				} else if (videoid != null) {
+					video.setVideoId(videoid);
 				} else {
-
-					video.setPoster(fileold);
-
+					video.setVideoId("thumbnail.mp4");
 				}
-
 			} catch (Exception e) {
-
-				e.printStackTrace();
-
+				// TODO: handle exception
 			}
 
 			videoService.update(video);
@@ -182,19 +138,13 @@ public class VideoController extends HttpServlet {
 			resp.sendRedirect(req.getContextPath() + "/admin/videos");
 
 		} else if (url.contains("/admin/video/insert")) {
-
 			Video video = new Video();
-			
-			String videoid = req.getParameter("videoid");
-			
-			String title = req.getParameter("title");
-			
-			String description = req.getParameter("description");
 
+			String videoid = req.getParameter("videoid");
+			String title = req.getParameter("title");
+			String description = req.getParameter("description");
 			int active = Integer.parseInt(req.getParameter("actives"));
-			
 			int views = Integer.parseInt(req.getParameter("views"));
-			
 			int categoryid = Integer.parseInt(req.getParameter("categoryid"));
 
 			video.setVideoId(videoid);
@@ -203,8 +153,9 @@ public class VideoController extends HttpServlet {
 			video.setActive(active);
 			video.setViews(views);
 			video.setCategory(categoryService.findById(categoryid));
-			
+
 			String fname = "";
+			String fname2 = "";
 
 			String uploadPath = Constant.UPLOAD_DIRECTORY;
 
@@ -227,6 +178,23 @@ public class VideoController extends HttpServlet {
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+			try {
+				Part part = req.getPart("videoid1");
+				if (part.getSize() > 0) {
+					String fileName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
+					int index = fileName.lastIndexOf(".");
+					String ext = fileName.substring(index + 1);
+					fname2 = System.currentTimeMillis() + "." + ext;
+					part.write(uploadPath + "/" + fname2);
+					video.setVideoId(fname2);
+				} else if (videoid != null) {
+					video.setVideoId(videoid);
+				} else {
+					video.setVideoId("thumbnail.mp4");
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
 			}
 			videoService.insert(video);
 			resp.sendRedirect(req.getContextPath() + "/admin/videos");

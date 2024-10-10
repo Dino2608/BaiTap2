@@ -13,6 +13,9 @@
 		<br> 
 		<input type="text"id="videoid" name="videoid" value = "${video.videoId }">
 		<br>
+		<label class="form-label" for="lname">Upload Video:</label><br>
+		<input class="form-input" type="file" id="lname1" name="videoid1" >
+		<br>
 		<label for="fname">Title:</label>
 		<br> 
 		<input type="text"id="title" name="title" value = "${video.title }">
